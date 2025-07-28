@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Order Receiver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .order-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .order-display {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .order-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .status-pending {
+            color: orange;
+            font-weight: bold;
+        }
+        .status-completed {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>☕ Cafe Order Receiver</h1>
+    
+    <div class="order-form">
+        <h2>New Order</h2>
+        <form id="orderForm">
+            <label for="tableNumber">Table Number:</label>
+            <input type="text" id="tableNumber" required>
+            
+            <label for="customerName">Customer Name (Optional):</label>
+            <input type="text" id="customerName">
+            
+            <label for="item">Item:</label>
+            <select id="item" required>
+                <option value="">Select an item</option>
+                <option value="Coffee">Coffee</option>
+                <option value="Tea">Tea</option>
+                <option value="Cappuccino">Cappuccino</option>
+                <option value="Latte">Latte</option>
+                <option value="Sandwich">Sandwich</option>
+                <option value="Cake">Cake</option>
+                <option value="Salad">Salad</option>
+            </select>
+            
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" min="1" value="1" required>
+            
+            <label for="specialInstructions">Special Instructions:</label>
+            <input type="text" id="specialInstructions">
+            
+            <button type="submit">Add Order</button>
+        </form>
+    </div>
+    
+    <div class="order-display">
+        <h2>Current Orders</h2>
+        <div id="ordersList">
+            <!-- Orders will be displayed here -->
+            <p>No orders yet. Add an order above.</p>
+        </div>
+    </div>
+
+    <script>
+        let orders = [];
+        
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const tableNumber = document.getElementById('tableNumber').value;
+            const customerName = document.getElementById('customerName').value || 'Anonymous';
+            const item = document.getElementById('item').value;
+            const quantity = document.getElementById('quantity').value;
+            const specialInstructions = document.getElementById('specialInstructions').value;
+            
+            const order = {
+                id: Date.now(),
+                tableNumber,
+                customerName,
+                item,
+                quantity,
+                specialInstructions,
+                status: 'pending',
+                time: new Date().toLocaleTimeString()
+            };
+            
+            orders.push(order);
+            displayOrders();
+            
+            // Reset form
+            document.getElementById('orderForm').reset();
+        });
+        
+        function displayOrders() {
+            const ordersList = document.getElementById('ordersList');
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p>No orders yet. Add an order above.</p>';
+                return;
+            }
+            
+            let html = '<table><tr><th>Table</th><th>Customer</th><th>Item</th><th>Qty</th><th>Notes</th><th>Time</th><th>Status</th><th>Action</th></tr>';
+            
+            orders.forEach(order => {
+                html += `
+                    <tr>
+                        <td>${order.tableNumber}</td>
+                        <td>${order.customerName}</td>
+                        <td>${order.item}</td>
+                        <td>${order.quantity}</td>
+                        <td>${order.specialInstructions || '-'}</td>
+                        <td>${order.time}</td>
+                        <td class="status-${order.status}">${order.status}</td>
+                        <td>
+                            <button onclick="completeOrder(${order.id})">Complete</button>
+                            <button onclick="cancelOrder(${order.id})">Cancel</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</table>';
+            ordersList.innerHTML = html;
+        }
+        
+        function completeOrder(orderId) {
+            const orderIndex = orders.findIndex(order => order.id === orderId);
+            if (orderIndex !== -1) {
+                orders[orderIndex].status = 'completed';
+                displayOrders();
+            }
+        }
+        
+        function cancelOrder(orderId) {
+            orders = orders.filter(order => order.id !== orderId);
+            displayOrders();
+        }
+    </script>
+</body>
+</html>
